@@ -36,7 +36,6 @@ Servo leftServo;
 Servo rightServo;
 
 #include <Servo.h>
-#include "robotDefines.h"
 
 String command;
 String device;
