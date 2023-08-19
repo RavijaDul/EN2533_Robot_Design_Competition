@@ -59,21 +59,21 @@ void setup() {
 }
 
 void loop() {
-  distanceFront = (sonarFront.ping_median(iterations) / 2) * 0.0343
-  distanceRight = (sonarRight.ping_median(iterations) / 2) * 0.0343
-  distanceLeft = (sonarLeft.ping_median(iterations) / 2) * 0.0343
+  distanceFront = (sonarFront.ping_median(iterations) / 2) * 0.0343;
+  distanceRight = (sonarRight.ping_median(iterations) / 2) * 0.0343;
+  distanceLeft = (sonarLeft.ping_median(iterations) / 2) * 0.0343;
   
   //Kp*e(t)
   curError = desiredState - distanceRight;
   proportional = kp*curError;
 
   //Ki*int(e(t))
-  totalError += error;
+  totalError += curError;
   integral = ki*totalError;
 
   //Kd*d(e(t))
-  derivative = kd*(curError - prevError)
-  prevError = error; 
+  derivative = kd*(curError - prevError);
+  prevError = curError; 
 
   pidSum = proportional + integral + derivative;
 }
