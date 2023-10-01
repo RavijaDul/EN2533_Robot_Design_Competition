@@ -27,22 +27,41 @@ void loop() {
 **************************************************************
 /*method of calculating angle */
 
-// Read accelerometer data along X, Y, and Z axes
-float accelX = readAccelX();
-float accelY = readAccelY();
-float accelZ = readAccelZ();
+#include <MPU6050.h>
+#include <math.h>
+#include <Wire.h>
 
-// Calculate total acceleration
-float totalAccel = sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
+MPU6050 mpu;
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();
+  mpu.initialize();
+  //mpu.setFullScaleAccelRange(MPU6050_ACCEL_FS_4G);
+  
+}
+
+void loop() {
+  int16_t ax, ay, az;
+  mpu.getAcceleration(&ax, &ay, &az);
+  float accelX = ax / 16384.0*9.81;
+  float accelY = ay / 16384.0*9.81;
+  float accelZ = az / 16384.0*9.81;
+  
+  double totalAccel = sqrt(pow(accelX,2)+pow(accelY,2) + pow(accelZ,2));
 
 // Calculate tilt angle in radians
-float tiltAngleRad = acos(accelZ / totalAccel);
+  double tiltAngleRad = acos(accelZ / totalAccel);
 
 // Convert tilt angle to degrees
-float tiltAngleDeg = tiltAngleRad * (180.0 / PI);
+  double tiltAngleDeg = tiltAngleRad * (180.0 / PI);
 
 // Print or use the tilt angle in degrees
-print("Tilt Angle (degrees): ", tiltAngleDeg);
+  
+  Serial.print("Tilt Angle (degrees): ");
+  Serial.println(tiltAngleDeg);
+  delay(1000);
+}
 
 *****************************************************************
 /* calculating torque required*/
