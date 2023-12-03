@@ -50,7 +50,6 @@ void set_forward();
 void linFollow();
 
 void setup() {
-  Serial.begin(9600);
   pinMode(IR1, INPUT);
   pinMode(IR2, INPUT);
   pinMode(IR3, INPUT);
@@ -76,128 +75,27 @@ void setup() {
 void loop() {
   float dist1 = readUltrasonic(trig1,echo1);
   float dist2 = readUltrasonic(trig2,echo2);
-// Serial.println(dist1);
-// Serial.println(dist2);
+
  if (dist1 < max_distance) {
     t1 = millis();
   }
   else if (dist2 < max_distance) {
     t2 = millis();
   }
-
  
   if (t1 > 0 && t2 > 0) {       // if both sensors have nonzero timestamps
     if (t1 < t2) {                      // if left sensor triggered first
-      //Serial.println("Left to right");    // direction is left to right
-      //stop();
+      // direction is left to right
     }
     else if (t2 < t1) {  
-      //Serial.println("Right to left");
       set_forward();           // if right sensor triggered first
       lineFollow();
-          // direction is right to left
+      // direction is right to left
     }
-  else{
-    Serial.println(" ");
-  }
   t1=0;
   t2=0;
-  
 }
-
-
-  // int direction = decideDirection();
-  // if ((direction == -1) && (count2 == 1)){
-  //   count2 = 0;
-  //   set_forward();
-  //   lineFollow();
-  // }
-  // else {
-  //   stop();
-  // }
 }
-// int t1 = 0;
-// int t2 = 0;
-// int decideDirection() {
-//   int dir = 0;
-//   if (distanceVary1()) {
-
-//     // Serial.print(directionArray[0]);
-//     // Serial.print(directionArray[1]);
-//     // Serial.print(directionArray[2]);
-//     // Serial.println(directionArray[3]);
-
-//     directionArray[i] = 1;
-//     directionArray[i+1] = 0; 
-//     if (i>1){
-//       i = 0;
-//     }
-//     else {
-//       i = i+2;
-//     }
-//   }
-//   if (distanceVary2()){
-
-    
-
-//     directionArray[i] = 0;
-//     directionArray[i+1] = 1; 
-//     if (i>1) {
-//       i = 0;
-//     }
-//     else {
-//       i = i+2;
-//     }
-//   }
-//   int dif = t2-t1;
-//   if ((t2-t1>3000) || (t1-t2>3000)){
-//     directionArray[0] = -1;
-//     directionArray[1] = -1;
-//     directionArray[2] = -1;
-//     directionArray[3] = -1;
-//   }
-//   Serial.print(directionArray[0]);
-//     Serial.print(directionArray[1]);
-//     Serial.print(directionArray[2]);
-//     Serial.println(directionArray[3]);
-
-//   if (compareArrays(right,directionArray)){
-//     dir = 1;
-//   }
-//   if (compareArrays(left,directionArray)){
-//     dir = -1;
-//   }
-//   return dir;
-// }
-
-// bool compareArrays(int arr1[], int arr2[]) {
-//   for (int i = 0; i < 4; i++) {
-//     if (arr1[i] != arr2[i]) {
-//       return false; // Arrays are not equal
-//     }
-//   }
-//   return true; // Arrays are equal
-// }
-
-bool distanceVary1(){
-  float distance1_1 = readUltrasonic(trig1,echo1);
-  if ((3< distance1_1)&&(distance1_1<7)){
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-// bool distanceVary2(){
-//   float distance2_1 = readUltrasonic(trig2,echo2);
-//   if ((3< distance2_1)&&(distance2_1<7)){
-//     return true;
-//   }
-//   else {
-//     return false;
-//   }
-// }
 
 float readUltrasonic(int trigPin, int echoPin){
   digitalWrite(trigPin, LOW);
