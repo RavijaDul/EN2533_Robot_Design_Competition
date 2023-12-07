@@ -42,6 +42,15 @@ const float wheel_radius = 32.5/1000; // radius of the wheel in meters
 const float robot_mass = 1.0; // mass of the robot in kilograms
 const float max_speed = 5.24;//max speed of robot in ms^-1 //0.3
 
+float accelX;
+float accelY;
+float accelZ;
+int16_t ax, ay, az;
+double totalAccel;
+double tiltAngleRad;
+double tiltAngleDeg;
+int minSpeed =10;
+
 Servo myservoUp;
 Servo myservoDown;
 
@@ -53,15 +62,15 @@ void setup() {
   myservoUp.attach(10);  // attaches the servo on pin 9 to the servo object
   myservoDown.attach(9); 
   myservoUp.write(0);
-  delay(500);
+  delay(100);
   myservoDown.write(0);
-  delay(500);
+  delay(100);
   myservoUp.write(170);
   delay(100);
   myservoDown.write(70);
   delay(100);
-  
-  Serial.begin(9600);
+
+  // Serial.begin(9600);
   pinMode(IR0, INPUT);
   pinMode(IR1, INPUT);
   pinMode(IR2, INPUT);
@@ -88,49 +97,52 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  int16_t ax, ay, az;
   mpu.getAcceleration(&ax, &ay, &az);
-  float accelX = ax / 16384.0*9.81;
-  float accelY = ay / 16384.0*9.81;
-  float accelZ = az / 16384.0*9.81;
+  accelX = ax / 16384.0*9.81;
+  accelY = ay / 16384.0*9.81;
+  accelZ = az / 16384.0*9.81;
 
-  double totalAccel = sqrt(pow(accelX,2)+pow(accelY,2) + pow(accelZ,2));
+  totalAccel = sqrt(pow(accelX,2)+pow(accelY,2) + pow(accelZ,2));
 
-  double tiltAngleRad = acos(accelZ / totalAccel);
+  tiltAngleRad = acos(accelZ / totalAccel);
 
 // Convert tilt angle to degrees
-  double tiltAngleDeg = tiltAngleRad * (180.0 / PI);
+  tiltAngleDeg = tiltAngleRad * (180.0 / PI);
 
   if (tiltAngleDeg>15){
     baseSpeed = 175;
+    minSpeed = 150;
 
   }
-  if (tiltAngleDeg<0){
-    baseSpeed = 70;
+  else if (tiltAngleDeg<0){
+    baseSpeed = 60;
+    minSpeed = 10;
+  }
+  else {
+    baseSpeed = 85;
+    minSpeed = 10;
   }
   lineFollow();
 }
 
 void lineFollow(){
-  //read_IR();
-  // if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
-  //   //analogWrite(ENB, 50);
-  //   //delay(100);
-  //   stop();
-  //   while (1){
+  read_IR();
+  if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
+    //analogWrite(ENB, 50);
+    //delay(100);
+    stop();
+    // while (1){
 
-  //   }
-  // }
+    // }
+  }
 
-  analogWrite(ENA, 200);
-  analogWrite(ENB, 200);
+  // analogWrite(ENA, 200);
+  // analogWrite(ENB, 200);
 
   set_forward();
-  //PID_control();
-  //set_speed();
+  PID_control();
+  set_speed();
 }
-
-int minSpeed =10;
 
 void PID_control() {
   error = 0;
