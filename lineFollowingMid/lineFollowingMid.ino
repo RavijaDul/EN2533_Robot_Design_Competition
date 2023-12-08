@@ -1,11 +1,11 @@
-#define IR0 52
+#define IR0 22
 #define IR1 A0//11
 #define IR2 A1//12
 #define IR3 A2//13
 #define IR4 A3//2
 #define IR5 A4//3
 #define IR6 A5//4
-#define IR7 53
+#define IR7 23
 
 #define ENA 2//5  //RIGHT
 #define motorInput1 3//7 
@@ -22,7 +22,7 @@ int IR_weights[8] = {0, -15, -10, -5, 5, 10, 15, 0};
 int RMotor = 0;
 int LMotor = 0;
 int speedAdjust = 0;
-int baseSpeed = 85; //final = 75
+int baseSpeed = 150; //final = 75
 
 float P, I, D;
 float error = 0;
@@ -66,8 +66,11 @@ void setup() {
 void loop() {
   read_IR();
   if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
-    //analogWrite(ENB, 50);
+    analogWrite(ENA, 150);
+    analogWrite(ENB, 150);
+    set_forward();
     //delay(100);
+    delay(1100);
     stop();
     while (1){
 
@@ -127,8 +130,9 @@ void PID_control() {
 
     digitalWrite(motorInput1, HIGH);
     digitalWrite(motorInput2, LOW);
-    digitalWrite(motorInput3, HIGH);
-    digitalWrite(motorInput4, LOW);
+    digitalWrite(motorInput3, LOW);
+    digitalWrite(motorInput4, HIGH);
+    delay(100);
   }
   if (LMotor<0){
     analogWrite(ENA, RMotor);
@@ -136,8 +140,8 @@ void PID_control() {
 
     digitalWrite(motorInput1, LOW);
     digitalWrite(motorInput2, HIGH);
-    digitalWrite(motorInput3, LOW);
-    digitalWrite(motorInput4, HIGH);
+    digitalWrite(motorInput3, HIGH);
+    digitalWrite(motorInput4, LOW);
   }
   }
   if (LMotor>MAX_SPEED){
@@ -178,8 +182,8 @@ void set_speed(){
 void set_forward(){
   digitalWrite(motorInput1, LOW);
   digitalWrite(motorInput2, HIGH);
-  digitalWrite(motorInput3, HIGH);
-  digitalWrite(motorInput4, LOW);
+  digitalWrite(motorInput3, LOW);
+  digitalWrite(motorInput4, HIGH);
 }
 
 void stop(){
