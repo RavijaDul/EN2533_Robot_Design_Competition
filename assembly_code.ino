@@ -12,15 +12,15 @@
 
 #define soundSensorPin A9
 
-#define SW1 45
-#define SW2 46
-#define SW3 47
-#define SW4 48
-#define SW5 49
-#define SW6 50
-#define SW7 51
+// #define SW1 47
+// #define SW2 46
+// #define SW3 47
+// #define SW4 48
+// #define SW5 49
+#define SW6 47
+// #define SW7 51
 
-int task;
+int task = 1;
 
 #define ENA 2//5  //RIGHT
 #define motorInput1 3//7 
@@ -40,6 +40,7 @@ int task;
 #define echo3 26
 
 #define MAX_SPEED 255
+#define MAX_DISTANCE 25
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_1X);
 
@@ -72,7 +73,17 @@ float max_distance = 10;
 int t1;
 int t2;
 
-int count =0;
+float sensor1 = 0;
+float sensor2 = 0;
+float sensor3 = 0;
+float sensor4 = 0;
+
+float frontLeftDistance;
+float frontRightDistance;
+float rightDistance;
+float leftDistance;
+
+int count = 0;
 
 void PID_control();
 void read_IR();
@@ -83,7 +94,7 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
 
-   pinMode(soundSensorPin, INPUT);
+  pinMode(soundSensorPin, INPUT);
 
   pinMode(IR0, INPUT);
   pinMode(IR1, INPUT);
@@ -102,10 +113,15 @@ void setup() {
   pinMode(motorInput3, OUTPUT);
   pinMode(motorInput4, OUTPUT);
 
+  pinMode(trig0, OUTPUT);
+  pinMode(echo0, INPUT);
   pinMode(trig1, OUTPUT);
-  pinMode(trig2, OUTPUT);
   pinMode(echo1, INPUT);
+  pinMode(trig2, OUTPUT);
   pinMode(echo2, INPUT);
+  pinMode(trig3, OUTPUT);
+  pinMode(echo3, INPUT);
+
   start_time = millis();
 
   set_forward();
@@ -113,12 +129,15 @@ void setup() {
   task = 1;
 }
 
+int countU = 1;
+
 void loop() {
   task=checkPointCounter();//Need more accurate ways
   taskSwitcher();
 
   switch (task) {
       case 1:
+      
         task_01();
         //task 1 here
         break;
@@ -131,43 +150,43 @@ void loop() {
         //task 3 here
         break;
       case 4:
-        task_04();
+        //task_04();
        //task 4 here
         break;
       case 5:
         //task 5 here
         break;
       case 6:
-        //task 6 here
+        task_06();
         break;
       case 7:
-       //task 7 here
+        task_07();
         break;
   }
 }
 
 void taskSwitcher(){
-  if(digitalRead(SW1)==0){
-    task=1;
-  }
-  else if(digitalRead(SW2)==0){
-    task=2;
-  }
-  else if(digitalRead(SW3)==0){
-    task=3;
-  }
-  else if(digitalRead(SW4)==0){
-    task=4;
-  }
-  else if(digitalRead(SW5)==0){
-    task=5;
-  }
-  else if(digitalRead(SW6)==0){
+  // if(digitalRead(SW1)==0){
+  //   task=1;
+  // }
+  // else if(digitalRead(SW2)==0){
+  //   task=2;
+  // }
+  // else if(digitalRead(SW3)==0){
+  //   task=3;
+  // }
+  // else if(digitalRead(SW4)==0){
+  //   task=4;
+  // }
+  // else if(digitalRead(SW5)==0){
+  //   task=5;
+  // }
+  if(digitalRead(SW6)==0){
     task=6;
   }
-  else if(digitalRead(SW6)==0){
-    task=7;
-  }
+  // else if(digitalRead(SW7)==0){
+  //   task=7;
+  // }
   return ;
 }
 
@@ -184,6 +203,48 @@ void task_01(){
   set_forward();
   PID_control();
   set_speed();
+}
+
+void task_02(){
+  sensor1 = readUltrasonic(trig0, echo0);
+  sensor2 = readUltrasonic(trig1, echo1);
+  sensor3 = readUltrasonic(trig2, echo2);
+  sensor4 = readUltrasonic(trig3, echo3);
+
+  if (sensor1<0){sensor1=0;}
+  if (sensor2<0){sensor2=0;}
+  if (sensor3<0){sensor3=0;}
+  if (sensor4<0){sensor4=0;}
+
+  Serial.print(sensor1);
+   Serial.print(" ");
+    Serial.print(sensor2);
+    Serial.print(" ");
+    Serial.print(sensor3);
+   Serial.print(" ");
+    Serial.print(sensor4);
+    Serial.println(" ");
+
+    if(( sensor2<15 || sensor3<15) && (sensor2!=0) && (sensor3!=0)) {
+      if (countU == 1){
+      turnLeft();
+      delay(4500);
+      moveForward();
+      delay(1000);
+      countU = 2;
+      }
+      else if (countU == 2){
+      turnRight();
+      delay(4500);
+      moveForward();
+      delay(1000);
+      // turnRight();
+      // delay(500);
+      countU = 3;
+      }
+    }
+    set_forward();
+    lineFollow();
 }
 
 void task_06(){
@@ -232,13 +293,13 @@ void task_07(){
     }
     else if (t2 < t1) {  
       //Serial.println("Right to left");
-      while !(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
+      while (!(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0)){
         lineFollow();
       }          
       // if right sensor triggered first
         turnRight();
         delay(1000);
-        while !(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
+        while (!(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0)){
           lineFollow();
       }
       analogWrite(ENA, 75);
@@ -257,62 +318,7 @@ void task_07(){
 }
 
 void task_04(){
-  //Drag the box 
-  int color =colorIdentification(); //Identify the color of box
-  //Reverse till the checkpoint
-  read_IR();
-  int summ=sum();
-  if (summ<2){
-    stop();
-  }
-
-  if (color==0){ //Should combine the IR effect also
-    TurnLeft();
-  }
-  else{
-    TurnRight();
-  }
-
-  int summ = sum();
-  read_IR();
-  if (IR_val[0]==1 && IR_val[1]==1 && IR_val[2]==1 && IR_val[3]==1 && IR_val[4]==1 && IR_val[5]==1){
-    turnLeft();
-  }
-  else if (summ<2){
-    stop();
-    delay(500);
-    turnLeft();
-  }
-  else if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[4]==1 && IR_val[5]==1){
-    stop();
-    delay(500);
-    turnLeft();
-  }
-
-  else if (IR_val[0]==1 && IR_val[1]==1 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0){
-    stop();
-    delay(500);
-    turnRight();
-  }
-  if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0){
-    stop();
-    moveForward();
-    delay(500);
-
-  }
-  else{
-  PID_control();
-  set_speed();
-  }
-  //should keep the box on the colored square
-}
-int checkPointCounter(){
-  read_IR();
-  int summ=sum();
-  if (summ<2){
-    count+=1;
-  }
-  return count;
+ //comment
 }
 
 int colorIdentification(){
@@ -328,15 +334,40 @@ int colorIdentification(){
   return color; 
 }
 
+void lineFollow(){
+  read_IR();
+  // if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
+  //   //analogWrite(ENB, 50);
+  //   //delay(100);
+  //   stop();
+  // }
+  PID_control();
+  set_speed();
+}
+
+
+float readUltrasonic(int trigPin, int echoPin){
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  int duration = pulseIn(echoPin, HIGH);
+  float distance = duration * 0.034 / 2;
+  if (duration>0){
+    return distance;
+  }
+}
 void turnLeft(){
   analogWrite(ENA, 80);
-  analogWrite(ENB, 50);
+  analogWrite(ENB, 0);
 
   digitalWrite(motorInput1, LOW);
   digitalWrite(motorInput2, HIGH);
   digitalWrite(motorInput3, LOW);
   digitalWrite(motorInput4, HIGH);
-  delay(500); //adjust the delay
+   //adjust the delay
+  Serial.println("Lturn");
 }
 
 void turnRight(){
@@ -347,18 +378,31 @@ void turnRight(){
   digitalWrite(motorInput2, LOW);
   digitalWrite(motorInput3, HIGH);
   digitalWrite(motorInput4, LOW);
-  delay(500);//adjust the delay
+ //adjust the delay
+  Serial.println("Rturn");
 }
 
 //Move with a given velocity
 void moveForward() {
   // Move the robot forward
+  analogWrite(ENA, 50);
+  analogWrite(ENB, 50);
+
   digitalWrite(motorInput1, LOW);
   digitalWrite(motorInput2, HIGH);
   digitalWrite(motorInput3, HIGH);
   digitalWrite(motorInput4, LOW);
-  analogWrite(ENA, 50);
-  analogWrite(ENB, 50);
+  
+}
+
+void moveBackward() {
+  analogWrite(ENA, 75);
+  analogWrite(ENB, 75);
+
+  digitalWrite(motorInput1, HIGH);
+  digitalWrite(motorInput2, LOW);
+  digitalWrite(motorInput3, LOW);
+  digitalWrite(motorInput4, HIGH);
 }
 
 void reverse(){
@@ -438,6 +482,17 @@ void read_IR(){
   IR_val[7] = digitalRead(IR7);
 }
 
+int checkPointCounter(){
+  read_IR();
+  int summ=0;
+  for ( int i = 0; i < 8; i++ )
+    summ += IR_val[ i ];
+  if (summ==0){
+    count+=1;
+  }
+  return;
+}
+
 void set_speed(){
   analogWrite(ENA, RMotor);
   analogWrite(ENB, LMotor);
@@ -456,11 +511,4 @@ void stop(){
   digitalWrite(motorInput2, LOW);
   digitalWrite(motorInput3, LOW);
   digitalWrite(motorInput4, LOW);
-}
-
-int sum(){
-  int summ;
-  for ( int i = 0; i < 6; i++ )
-    summ += IR_val[ i ];
-  return summ;
 }
