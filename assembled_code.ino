@@ -132,7 +132,7 @@ void setup() {
 int countU = 1;
 
 void loop() {
-  task=checkPointCounter();//Need more accurate ways
+  // task=checkPointCounter();//Need more accurate ways
   taskSwitcher();
 
   switch (task) {
