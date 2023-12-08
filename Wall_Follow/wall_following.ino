@@ -1,3 +1,5 @@
+#include <Servo.h>
+
 #define trig1 12
 #define echo1 11 
 #define trig0 10
@@ -23,7 +25,7 @@
 #define motorInput4 5//10
 #define ENB 7//6
 
-#define MAX_SPEED 150
+#define MAX_SPEED 255
 #define MAX_DISTANCE 25
 
 int IR_val[] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -55,6 +57,9 @@ float leftDistance;
 int frontObstacleThreshold = 10; // Adjust this value based on your sensors and robot
 int leftObstacleThreshold = 10;  // Adjust this value based on your sensors and robot
 
+Servo myservoUp;
+Servo myservoDown;
+
 void setup() {
   Serial.begin(9600);
   pinMode(trig0, OUTPUT);
@@ -83,14 +88,26 @@ void setup() {
   pinMode(motorInput3, OUTPUT);
   pinMode(motorInput4, OUTPUT);
 
+  myservoUp.attach(8);
+  myservoDown.attach(13);
+delay(500);
+myservoDown.write(80);
+delay(1000);
+myservoUp.write(100);
+delay(2000);
+
+
+
   set_forward();
-  delay(2000);
+  delay(200);
 }
 
 int countU = 1;
 
 void loop() {
   // stop();
+  set_forward();
+      lineFollow();
   sensor1 = readUltrasonic(trig0, echo0);
   sensor2 = readUltrasonic(trig1, echo1);
   sensor3 = readUltrasonic(trig2, echo2);
@@ -110,71 +127,40 @@ void loop() {
     Serial.print(sensor4);
     Serial.println(" ");
 
-    if(( sensor2<15 || sensor3<15) && (sensor2!=0) && (sensor3!=0)) {
+    if(( sensor2<17 || sensor3<17) && (sensor2!=0) && (sensor3!=0)) {
       if (countU == 1){
       turnLeft();
-      delay(4500);
-      moveForward();
-      delay(1000);
+      delay(2900); //2500
+      read_IR();
+      while(!(IR_val[1]==0 || IR_val[2]==0 || IR_val[3]==0 || IR_val[4]==0 || IR_val[5]==0 || IR_val[6]==0)){
+        read_IR();
+        moveForward();  
+        set_forward();
+        //delay(1000);
+      //   Serial.println( "Leturn");
+     }
+      lineFollow();
+      
       countU = 2;
       }
       else if (countU == 2){
       turnRight();
-      delay(4500);
-      moveForward();
-      delay(1000);
-      // turnRight();
-      // delay(500);
+      delay(2900); //2500
+      read_IR();
+       while(!(IR_val[1]==0 || IR_val[2]==0 || IR_val[3]==0 || IR_val[4]==0 || IR_val[5]==0 || IR_val[6]==0 )){
+        read_IR();
+        moveForward();
+        set_forward();
+        //delay(1500);
+        Serial.println( "Riturn");
+      }
       countU = 3;
       }
     }
 
-    
-    // if((sensor1< 15 || sensor2 < 15) && (sensor1!=0) && (sensor2 !=0)){
-    //   turnRight();
-    //   delay(1500);
-    //   moveForward();
-    //   delay(1000);
-    // }
-
-    //  if(sensor3<15 &&  sensor2<15 && sensor3!=0 && sensor2!=0 ){
-    //   moveBackward();
-    //   delay(100);
-    //   turnRight();
-    //   delay(1500);
-    //   moveForward();
-    //   delay(1000);
-    // }
-    
       set_forward();
       lineFollow();
-    //
-    // stop();
-    
-   // delay(200);
-//   if ((sensor3<10) || (sensor4<10)){
-//     turnLeft();
-//     delay(100);
-//   }
 
-//   if (((10<sensor3) && (sensor3<15)) || ((10<sensor4) && (sensor4<15))){
-//     turnRight();
-//     delay(80);
-//   }
-
-//   if ((sensor2<10) || (sensor1<10)){
-//     turnRight();
-//     delay(100);
-//   }
-
-//   if (((10<sensor2) && (sensor2<15)) || ((10<sensor1) && (sensor1<15))){
-//     turnRight();
-//     delay(80);
-//   }
-
-//   set_forward();
-//   lineFollow();
-  
  }
 
 void lineFollow(){
@@ -212,27 +198,27 @@ void moveBackward() {
 }
 
 void turnRight(){
-  analogWrite(ENA, 50);
-  analogWrite(ENB, 80);
+  analogWrite(ENA, 40);
+  analogWrite(ENB, 95);
 
   digitalWrite(motorInput1, HIGH);
   digitalWrite(motorInput2, LOW);
   digitalWrite(motorInput3, HIGH);
   digitalWrite(motorInput4, LOW);
  //adjust the delay
-  Serial.println("Rturn");
+  // Serial.println("Rturn");
 }
 
 void turnLeft(){
-  analogWrite(ENA, 80);
-  analogWrite(ENB, 0);
+  analogWrite(ENA, 110);
+  analogWrite(ENB, 40);
 
   digitalWrite(motorInput1, LOW);
   digitalWrite(motorInput2, HIGH);
   digitalWrite(motorInput3, LOW);
   digitalWrite(motorInput4, HIGH);
    //adjust the delay
-  Serial.println("Lturn");
+  
 }
 
 void read_IR(){
@@ -324,7 +310,7 @@ void stop(){
 }
 
 void moveForward(){
-  analogWrite(ENA, 70);
-  analogWrite(ENB, 70);
+  analogWrite(ENA, 90);
+  analogWrite(ENB, 90);
   set_forward();
 }
