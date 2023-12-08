@@ -1,11 +1,11 @@
-#define IR0 52
+#define IR0 22
 #define IR1 A0//11
 #define IR2 A1//12
 #define IR3 A2//13
 #define IR4 A3//2
 #define IR5 A4//3
 #define IR6 A5//4
-#define IR7 53
+#define IR7 23
 
 #define ENA 2//5  //RIGHT
 #define motorInput1 3//7 
@@ -15,14 +15,14 @@
 #define ENB 7//6
 
 //Ultrasonic 
-#define trig0 26 // workin
-#define echo0 27 //workin
-#define trig1 25 //
-#define echo1 24 //
-#define trig2 51
-#define echo2 50 //workin
-#define trig3 23
-#define echo3 22
+#define trig0 10 // workin
+#define echo0 9 //workin
+#define trig1 12 //
+#define echo1 11 //
+#define trig2 35
+#define echo2 34 //workin
+#define trig3 27
+#define echo3 26
 
 #define MAX_SPEED 255
 
@@ -49,16 +49,11 @@ float Kd = 0.1;//10, 1 final = 6
 float Ki = 0; //final = 0
 unsigned long start_time; 
 float max_distance = 10;
-int t1;int t2;
-
-// void PID_control();
-// void read_IR();
-// void set_speed();
-// void set_forward();
-// void lineFollow();
+int t1;
+int t2;
 
 void setup() {
-  Serial.begin(9600);
+ // Serial.begin(9600);
   pinMode(IR0, INPUT);
   pinMode(IR1, INPUT);
   pinMode(IR2, INPUT);
@@ -86,8 +81,8 @@ void setup() {
 void loop() {
   float dist1 = readUltrasonic(trig1,echo1);
   float dist2 = readUltrasonic(trig2,echo2);
-// Serial.println(dist1);
-// Serial.println(dist2);
+//Serial.println(dist1);
+//Serial.println(dist2);
  if (dist1 < max_distance) {
     t1 = millis();
   }
@@ -103,17 +98,37 @@ void loop() {
     }
     else if (t2 < t1) {  
       //Serial.println("Right to left");
+      analogWrite(ENA, 60);
+      analogWrite(ENB, 60);
       set_forward();           // if right sensor triggered first
-      lineFollow();
+      if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
+        turnRight();
+        delay(1000);
+      }
+      analogWrite(ENA, 80);
+      analogWrite(ENB, 80);
+      set_forward();
+      //lineFollow();
           // direction is right to left
     }
   else{
-    Serial.println(" ");
+    //Serial.println(" ");
   }
   t1=0;
   t2=0;
   
 }
+}
+
+void turnRight(){
+  analogWrite(ENA, 50);
+    analogWrite(ENB, 0);
+
+    digitalWrite(motorInput1, HIGH);
+    digitalWrite(motorInput2, LOW);
+    digitalWrite(motorInput3, HIGH);
+    digitalWrite(motorInput4, LOW);
+  // delay(1500);
 }
 
 float readUltrasonic(int trigPin, int echoPin){
@@ -124,7 +139,9 @@ float readUltrasonic(int trigPin, int echoPin){
   digitalWrite(trigPin, LOW);
   int duration = pulseIn(echoPin, HIGH);
   float distance = duration * 0.034 / 2;
-  return distance;
+  if (duration>0){
+    return distance;
+  }
 }
 
 void lineFollow(){
@@ -218,12 +235,14 @@ void read_IR(){
   IR_val[6] = digitalRead(IR6);
   IR_val[7] = digitalRead(IR7);
 
+  Serial.print(IR_val[0]);
   Serial.print(IR_val[1]);
   Serial.print(IR_val[2]);
   Serial.print(IR_val[3]);
   Serial.print(IR_val[4]);
   Serial.print(IR_val[5]);
-  Serial.println(IR_val[6]);
+  Serial.print(IR_val[6]);
+  Serial.println(IR_val[7]);
 }
 
 void set_speed(){
