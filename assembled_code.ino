@@ -16,9 +16,9 @@
 // #define SW2 46
 // #define SW3 47
 // #define SW4 48
-// #define SW5 49
+//#define SW5 49
 #define SW6 47
-// #define SW7 51
+#define SW7 49
 
 int task = 1;
 
@@ -122,6 +122,9 @@ void setup() {
   pinMode(trig3, OUTPUT);
   pinMode(echo3, INPUT);
 
+  pinMode(SW6, INPUT_PULLUP);
+  pinMode(SW7, INPUT_PULLUP);
+
   start_time = millis();
 
   set_forward();
@@ -130,7 +133,7 @@ void setup() {
 }
 
 int countU = 1;
-
+int count6=0;
 void loop() {
   // task=checkPointCounter();//Need more accurate ways
   taskSwitcher();
@@ -157,7 +160,13 @@ void loop() {
         //task 5 here
         break;
       case 6:
+      if (count6==0){
         task_06();
+        stop();
+      }
+      else{
+        stop();
+      }
         break;
       case 7:
         task_07();
@@ -170,6 +179,7 @@ void taskSwitcher(){
   //   task=1;
   // }
   // else if(digitalRead(SW2)==0){
+    
   //   task=2;
   // }
   // else if(digitalRead(SW3)==0){
@@ -184,9 +194,9 @@ void taskSwitcher(){
   if(digitalRead(SW6)==0){
     task=6;
   }
-  // else if(digitalRead(SW7)==0){
-  //   task=7;
-  // }
+  else if(digitalRead(SW7)==0){
+    task=7;
+  }
   return ;
 }
 
@@ -199,7 +209,7 @@ void task_01(){
     //delay(100);
     delay(1100);
     stop();
-    delay(1000);
+    delay(10000);
     task = 2;
   }
   set_forward();
@@ -264,6 +274,8 @@ void task_02(){
 }
 
 void task_06(){
+  count6+=1;
+  while (task==6){
   int sensorData = digitalRead(soundSensorPin);
 
   if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
@@ -293,6 +305,54 @@ void task_06(){
   else if (sensorData == HIGH){
     stop();
   }
+}
+
+while(task==7){
+  float dist1 = readUltrasonic(trig1,echo1);
+  float dist2 = readUltrasonic(trig2,echo2);
+//Serial.println(dist1);
+//Serial.println(dist2);
+ if (dist1 < max_distance) {
+    t1 = millis();
+  }
+  else if (dist2 < max_distance) {
+    t2 = millis();
+  }
+  if (t1 > 0 && t2 > 0) {       // if both sensors have nonzero timestamps
+    if (t1 < t2) {                      // if left sensor triggered first
+      //Serial.println("Left to right");    // direction is left to right
+      //stop();
+    }
+    else if (t2 < t1) {  
+      //Serial.println("Right to left");
+      while (!(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0)){
+        lineFollow();
+      }          
+      // if right sensor triggered first
+        turnRight();
+        delay(1000);
+        while (!(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0)){
+          lineFollow();
+      }
+      analogWrite(ENA, 150);
+    analogWrite(ENB, 150);
+    set_forward();
+    //delay(100);
+    delay(1100);
+    stop();
+    delay(1000);
+      task = 1;
+    }
+  // else{
+  //   //Serial.println(" ");
+  // }
+  t1=0;
+  t2=0;
+}
+}
+
+stop();
+
 }
 
 void task_07(){
