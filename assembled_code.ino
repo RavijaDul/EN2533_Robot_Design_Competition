@@ -325,27 +325,27 @@ while(task==7){
     }
     else if (t2 < t1) {  
       //Serial.println("Right to left");
-      while (!(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0)){
-        lineFollow();
-      }          
-      // if right sensor triggered first
-        turnRight();
+      analogWrite(ENA, 60);
+      analogWrite(ENB, 60);
+      set_forward();           // if right sensor triggered first
+      if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
+        analogWrite(ENA, 50);
+        analogWrite(ENB, 0);
+
+        digitalWrite(motorInput1, HIGH);
+        digitalWrite(motorInput2, LOW);
+        digitalWrite(motorInput3, HIGH);
+        digitalWrite(motorInput4, LOW);
         delay(1000);
-        while (!(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0)){
-          lineFollow();
       }
-      analogWrite(ENA, 150);
-    analogWrite(ENB, 150);
-    set_forward();
-    //delay(100);
-    delay(1100);
-    stop();
-    delay(1000);
-      task = 1;
+      analogWrite(ENA, 80);
+      analogWrite(ENB, 80);
+      set_forward();
+      
     }
-  // else{
+  else{
   //   //Serial.println(" ");
-  // }
+  }
   t1=0;
   t2=0;
 }
@@ -373,27 +373,29 @@ void task_07(){
     }
     else if (t2 < t1) {  
       //Serial.println("Right to left");
-      while (!(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0)){
-        lineFollow();
-      }          
-      // if right sensor triggered first
-        turnRight();
+      analogWrite(ENA, 60);
+      analogWrite(ENB, 60);
+      set_forward();           // if right sensor triggered first
+      if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
+        analogWrite(ENA, 50);
+    analogWrite(ENB, 0);
+
+    digitalWrite(motorInput1, HIGH);
+    digitalWrite(motorInput2, LOW);
+    digitalWrite(motorInput3, HIGH);
+    digitalWrite(motorInput4, LOW);
         delay(1000);
-        while (!(IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0)){
-          lineFollow();
       }
-      analogWrite(ENA, 150);
-    analogWrite(ENB, 150);
-    set_forward();
-    //delay(100);
-    delay(1100);
-    stop();
-    delay(1000);
-      task = 1;
+      analogWrite(ENA, 80);
+      analogWrite(ENB, 80);
+      set_forward();
+      //lineFollow();
+          // direction is right to left
     }
-  // else{
+      
+  else{
   //   //Serial.println(" ");
-  // }
+  }
   t1=0;
   t2=0;
 }
