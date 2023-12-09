@@ -34,7 +34,7 @@ int IR_weights[8] = {0, -15, -10, -5, 5, 10, 15, 0};
 int LMotor = 0;
 int RMotor = 0;
 int speedAdjust = 0;
-int baseSpeed = 85; //final = 75
+int baseSpeed = 150; //final = 75
 
 float P, I, D;
 float error = 0;
@@ -47,15 +47,13 @@ float sensor1 = 0;
 float sensor2 = 0;
 float sensor3 = 0;
 float sensor4 = 0;
+float t2;
+float t3 ;
 
 float frontLeftDistance;
 float frontRightDistance;
 float rightDistance;
 float leftDistance;
-
-// Define obstacle detection thresholds
-int frontObstacleThreshold = 10; // Adjust this value based on your sensors and robot
-int leftObstacleThreshold = 10;  // Adjust this value based on your sensors and robot
 
 Servo myservoUp;
 Servo myservoDown;
@@ -96,8 +94,6 @@ delay(1000);
 myservoUp.write(100);
 delay(2000);
 
-
-
   set_forward();
   delay(200);
 }
@@ -106,31 +102,32 @@ int countU = 1;
 
 void loop() {
   // stop();
-  set_forward();
-      lineFollow();
-  sensor1 = readUltrasonic(trig0, echo0);
-  sensor2 = readUltrasonic(trig1, echo1);
-  sensor3 = readUltrasonic(trig2, echo2);
-  sensor4 = readUltrasonic(trig3, echo3);
+  while (1){
+    lineFollow();
+    sensor2 = readUltrasonic(trig1, echo1);
+    sensor3 = readUltrasonic(trig2, echo2);
+    if ((sensor2<12 || sensor3<12)&& sensor2!=0 && sensor3!=0){
+      break;
+    }
+  }
+  // set_forward();
+  // lineFollow();
+  // sensor1 = readUltrasonic(trig0, echo0);
+  // sensor2 = readUltrasonic(trig1, echo1);
+  // sensor3 = readUltrasonic(trig2, echo2);
+  // sensor4 = readUltrasonic(trig3, echo3);
 
-  if (sensor1<0){sensor1=0;}
-  if (sensor2<0){sensor2=0;}
-  if (sensor3<0){sensor3=0;}
-  if (sensor4<0){sensor4=0;}
+  // if (sensor1<0){sensor1=0;}
+  // if (sensor2<0){sensor2=0;}
+  // if (sensor3<0){sensor3=0;}
+  // if (sensor4<0){sensor4=0;}
 
-  Serial.print(sensor1);
-   Serial.print(" ");
-    Serial.print(sensor2);
-    Serial.print(" ");
-    Serial.print(sensor3);
-   Serial.print(" ");
-    Serial.print(sensor4);
-    Serial.println(" ");
+  // 
 
-    if(( sensor2<17 || sensor3<17) && (sensor2!=0) && (sensor3!=0)) {
+    if(( sensor2<12 || sensor3<12) && (sensor2!=0) && (sensor3!=0)) {
       if (countU == 1){
       turnLeft();
-      delay(2900); //2500
+      delay(1600); //2500
       read_IR();
       while(!(IR_val[1]==0 || IR_val[2]==0 || IR_val[3]==0 || IR_val[4]==0 || IR_val[5]==0 || IR_val[6]==0)){
         read_IR();
@@ -139,28 +136,62 @@ void loop() {
         //delay(1000);
       //   Serial.println( "Leturn");
      }
-      lineFollow();
-      
-      countU = 2;
-      }
-      else if (countU == 2){
+     moveForward();
+     delay(500);
+     turnLeft();
+     delay(1000);
+     moveForward();
+     delay(500);
+    // sensor1 = readUltrasonic(trig0, echo0);
+  
+  while(1){
+    lineFollow();
+    sensor2 = readUltrasonic(trig1, echo1);
+  sensor3 = readUltrasonic(trig2, echo2);
+    if ((sensor2<12 || sensor3<12)&& sensor2!=0 && sensor3!=0){
+      break;
+    }
+  }
+
+  
       turnRight();
-      delay(2900); //2500
-      read_IR();
-       while(!(IR_val[1]==0 || IR_val[2]==0 || IR_val[3]==0 || IR_val[4]==0 || IR_val[5]==0 || IR_val[6]==0 )){
+      delay(2000); //2500
+      moveForward();
+      delay(1000);
+      while(!(IR_val[1]==0 || IR_val[2]==0 || IR_val[3]==0 || IR_val[4]==0 || IR_val[5]==0 || IR_val[6]==0)){
         read_IR();
-        moveForward();
+        moveForward();  
         set_forward();
-        //delay(1500);
-        Serial.println( "Riturn");
-      }
-      countU = 3;
+        //delay(1000);
+      //   Serial.println( "Leturn");
+     }
+
+     turnRight();
+     delay(2000);
+     lineFollow();
+ if (IR_val[0]==0 && IR_val[1]==0 && IR_val[2]==0 && IR_val[3]==0 && IR_val[4]==0 && IR_val[5]==0 && IR_val[6]==0 && IR_val[7]==0){
+    //analogWrite(ENB, 50);
+    //delay(100);
+    stop();
+  }
+      // analogWrite(ENA,255);
+      // analogWrite(ENB,255);
+      // set_forward();
+      // delay(1000);
+      // read_IR();
+      //  while(!(IR_val[1]==0 || IR_val[2]==0 || IR_val[3]==0 || IR_val[4]==0 || IR_val[5]==0 || IR_val[6]==0 )){
+      //   read_IR();
+      //   moveForward();
+      //   set_forward();
+      //   //delay(1500);
+      //   Serial.println( "Riturn");
+
+      //   lineFollow();
+      //  }
       }
     }
-
       set_forward();
       lineFollow();
-
  }
 
 void lineFollow(){
@@ -193,31 +224,32 @@ void moveBackward() {
 
   digitalWrite(motorInput1, HIGH);
   digitalWrite(motorInput2, LOW);
-  digitalWrite(motorInput3, LOW);
-  digitalWrite(motorInput4, HIGH);
+  digitalWrite(motorInput3, HIGH);
+  digitalWrite(motorInput4, LOW);
 }
 
 void turnRight(){
-  analogWrite(ENA, 40);
-  analogWrite(ENB, 95);
+  analogWrite(ENA, 255);
+  analogWrite(ENB, 255);
 
   digitalWrite(motorInput1, HIGH);
   digitalWrite(motorInput2, LOW);
-  digitalWrite(motorInput3, HIGH);
-  digitalWrite(motorInput4, LOW);
+  digitalWrite(motorInput3, LOW);
+  digitalWrite(motorInput4, HIGH);
  //adjust the delay
   // Serial.println("Rturn");
 }
 
 void turnLeft(){
-  analogWrite(ENA, 110);
-  analogWrite(ENB, 40);
+   //adjust the delay
+
+   analogWrite(ENA, 255);
+  analogWrite(ENB, 255);
 
   digitalWrite(motorInput1, LOW);
   digitalWrite(motorInput2, HIGH);
-  digitalWrite(motorInput3, LOW);
-  digitalWrite(motorInput4, HIGH);
-   //adjust the delay
+  digitalWrite(motorInput3, HIGH);
+  digitalWrite(motorInput4, LOW);
   
 }
 
@@ -266,8 +298,8 @@ void PID_control() {
 
     digitalWrite(motorInput1, HIGH);
     digitalWrite(motorInput2, LOW);
-    digitalWrite(motorInput3, HIGH);
-    digitalWrite(motorInput4, LOW);
+    digitalWrite(motorInput3, LOW);
+    digitalWrite(motorInput4, HIGH);
   }
   if (LMotor<0){
     analogWrite(ENA, RMotor);
@@ -275,8 +307,8 @@ void PID_control() {
 
     digitalWrite(motorInput1, LOW);
     digitalWrite(motorInput2, HIGH);
-    digitalWrite(motorInput3, LOW);
-    digitalWrite(motorInput4, HIGH);
+    digitalWrite(motorInput3, HIGH);
+    digitalWrite(motorInput4, LOW);
   }
   }
   if (LMotor>MAX_SPEED){
@@ -298,8 +330,8 @@ void set_speed(){
 void set_forward(){
   digitalWrite(motorInput1, LOW);
   digitalWrite(motorInput2, HIGH);
-  digitalWrite(motorInput3, HIGH);
-  digitalWrite(motorInput4, LOW);
+  digitalWrite(motorInput3, LOW);
+  digitalWrite(motorInput4, HIGH);
 }
 
 void stop(){
